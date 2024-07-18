@@ -34,7 +34,7 @@ Resources:
                   - 'ssm:GetParameters'
                   - 'ssm:GetParametersByPath'
                 Resource: 
-                  - 'arn:aws:ssm:us-east-1:975050064431:parameter/your-parameter-path/*'
+                  - 'arn:aws:ssm:us-east-1:975050064431:parameter/sample/*'
 
   # Create Lambda Function
   MyLambdaFunction:
