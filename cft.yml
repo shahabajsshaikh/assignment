@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for a Lambda function with S3 and Secrets Manager permissions
+
+Resources:
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties: 
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'LambdaS3SecretsManagerPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:DeleteObject'
+                  - 's3:ListBucket'
+                Resource: 'arn:aws:s3:::975050064431-bucket-dev/*'
+              - Effect: 'Allow'
+                Action:
+                  - 'secretsmanager:GetSecretValue'
+                  - 'secretsmanager:DescribeSecret'
+                Resource: 'arn:aws:secretsmanager:us-east-1:975050064431:secret:sample'
+  
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: 'MyPythonLambdaFunction'
+      Handler: 'lambda_function.lambda_handler'
+      Runtime: 'python3.8'
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: '975050064431-bucket-dev'
+        S3Key: 'lambda.zip'
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: '975050064431-bucket-dev'
+          SECRET_NAME: 'sample'
+          
+  LambdaInvokePermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: 's3.amazonaws.com'
